@@ -1,6 +1,0 @@
-{
-    "name": "HeyHeyThere.PSXForest",
-    "rootNamespace": "HeyHeyThere.PSXForest",
-    "references": ["Unity.InputSystem"],
-    "autoReferenced": true
-}

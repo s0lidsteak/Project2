@@ -2,37 +2,50 @@ using UnityEngine;
 
 public class PickUpScript : MonoBehaviour
 {
+    public string item = "Key1";
+    public string pickupMessage = "Picked up the key";
+    public float pickupRange = 2f;
 
-    public string item;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    Transform player;
+    PlayerInventory inventory;
+    bool showingPrompt;
+
     void Start()
     {
-        
+        GameObject p = GameObject.FindGameObjectWithTag("Player");
+        if (p == null)
+        {
+            Debug.LogWarning("PickUpScript: nothing is tagged Player");
+            return;
+        }
+
+        player = p.transform;
+        inventory = p.GetComponentInChildren<PlayerInventory>();
+        if (inventory == null) inventory = p.GetComponentInParent<PlayerInventory>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
-    }
+        if (player == null) return;
 
-    void OnTriggerEnter(Collider other)
-    
-    {
+        bool near = Vector3.Distance(transform.position, player.position) <= pickupRange;
 
-        if (other.CompareTag("Player"))
+        if (near && !showingPrompt)
         {
-
-           PlayerInventory inventory = other.GetComponent<PlayerInventory>(); 
-
-           inventory.AddItem(item);
+            MessageUI.Show("Press E to pick up", 0f);
+            showingPrompt = true;
         }
-        
+        else if (!near && showingPrompt)
+        {
+            MessageUI.Show("", 0f);
+            showingPrompt = false;
+        }
 
-
-
-        
-
-
+        if (near && Input.GetKeyDown(KeyCode.E))
+        {
+            if (inventory != null) inventory.AddItem(item);
+            MessageUI.Show(pickupMessage);
+            Destroy(gameObject);
+        }
     }
 }

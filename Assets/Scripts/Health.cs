@@ -1,16 +1,34 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Health : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public int MaxHealth = 100;
+    int currentHealth;
+
+    public UnityEvent onDamaged;
+    public UnityEvent onDeath;
+
     void Start()
     {
-        
+        currentHealth = MaxHealth;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void TakeDamage(int amount)
     {
-        
+        if (currentHealth <= 0) return;
+
+        currentHealth -= amount;
+        Debug.Log(gameObject.name + " health: " + currentHealth);
+
+        if (currentHealth <= 0)
+        {
+            currentHealth = 0;
+            onDeath.Invoke();
+        }
+        else
+        {
+            onDamaged.Invoke();
+        }
     }
 }
