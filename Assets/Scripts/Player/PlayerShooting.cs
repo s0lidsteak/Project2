@@ -23,6 +23,7 @@ public class PlayerShooting : MonoBehaviour
 
     [Header("Audio")]
     public AudioClip gunshotSound;
+    public float gunshotVolume = 0.8f;
 
     Animator animator;
     AudioSource audioSource;
@@ -34,7 +35,11 @@ public class PlayerShooting : MonoBehaviour
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
-        audioSource = GetComponent<AudioSource>();
+
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f;
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -87,7 +92,7 @@ public class PlayerShooting : MonoBehaviour
 
     void Fire()
     {
-        if (audioSource != null && gunshotSound != null) audioSource.PlayOneShot(gunshotSound);
+        if (gunshotSound != null) audioSource.PlayOneShot(gunshotSound, gunshotVolume);
 
         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         Debug.DrawRay(ray.origin, ray.direction * range, Color.red, 1f);

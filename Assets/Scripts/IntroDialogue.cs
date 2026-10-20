@@ -12,10 +12,8 @@ public class IntroDialogue : MonoBehaviour
         "Might as well bring my gun for safety."
     };
 
-    public string controlsHint = "Press 1 to draw the gun. Hold Right-Click to aim, Left-Click to shoot.";
-    public float hintDuration = 6f;
-
     PlayerShooting shooting;
+    float mouseTotal;
 
     IEnumerator Start()
     {
@@ -28,14 +26,59 @@ public class IntroDialogue : MonoBehaviour
         {
             MessageUI.Show(line + "   [Space]", 0f);
             yield return null;
-
-            while (MessageUI.instance != null && MessageUI.instance.messageText.text != "")
-            {
-                yield return null;
-            }
+            while (MessageUI.instance != null && MessageUI.instance.messageText.text != "") yield return null;
         }
 
+        yield return Step("Use W A S D to walk.", () => IsMoving(), 1f);
+        yield return Step("Hold Shift while moving to run.", () => IsMoving() && Input.GetKey(KeyCode.LeftShift), 0.75f);
+
+        mouseTotal = 0f;
+        yield return Step("Move the mouse to look around.", () => MouseMoved(20f), 0f);
+
         if (shooting != null) shooting.canEquip = true;
-        MessageUI.Show(controlsHint, hintDuration);
+        yield return Step("Press 1 to draw your gun.", () => shooting != null && shooting.gunInHand != null && shooting.gunInHand.activeSelf, 0f);
+        yield return Step("Hold Right Mouse to aim.", () => shooting != null && shooting.isAiming, 0.5f);
+
+        mouseTotal = 0f;
+        yield return Step("Keep holding and move the mouse to aim around.", () => shooting != null && shooting.isAiming && MouseMoved(15f), 0f);
+        yield return Step("Left Click to shoot.", () => shooting != null && shooting.isAiming && Input.GetMouseButtonDown(0), 0f);
+
+        MessageUI.Show("Press E to read signs and pick things up. Press Space to close messages.   [Space]", 0f);
+    }
+
+    IEnumerator Step(string message, System.Func<bool> done, float holdTime)
+    {
+        MessageUI.Show(message, 0f);
+        float held = 0f;
+
+        while (true)
+        {
+            if (MessageUI.instance != null && MessageUI.instance.messageText.text == "")
+            {
+                MessageUI.Show(message, 0f);
+            }
+
+            if (done())
+            {
+                held += Time.deltaTime;
+                if (held >= holdTime) break;
+            }
+
+            yield return null;
+        }
+
+        MessageUI.Show("Nice.", 1f);
+        yield return new WaitForSeconds(0.8f);
+    }
+
+    bool IsMoving()
+    {
+        return Mathf.Abs(Input.GetAxisRaw("Horizontal")) + Mathf.Abs(Input.GetAxisRaw("Vertical")) > 0f;
+    }
+
+    bool MouseMoved(float amount)
+    {
+        mouseTotal += Mathf.Abs(Input.GetAxis("Mouse X")) + Mathf.Abs(Input.GetAxis("Mouse Y"));
+        return mouseTotal >= amount;
     }
 }

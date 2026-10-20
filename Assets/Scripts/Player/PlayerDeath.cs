@@ -7,6 +7,7 @@ public class PlayerDeath : MonoBehaviour
 {
     public float restartDelay = 3f;
     public AudioClip hurtSound;
+    public float hurtVolume = 0.8f;
     public Image damageFlash;
     public float flashStrength = 0.4f;
     public float flashFadeSpeed = 2f;
@@ -20,7 +21,11 @@ public class PlayerDeath : MonoBehaviour
     {
         health = GetComponent<Health>();
         animator = GetComponentInChildren<Animator>();
-        audioSource = GetComponent<AudioSource>();
+
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.spatialBlend = 0f;
+
         health.onDamaged.AddListener(Hurt);
         health.onDeath.AddListener(Die);
     }
@@ -46,7 +51,7 @@ public class PlayerDeath : MonoBehaviour
             damageFlash.color = c;
         }
 
-        if (audioSource != null && hurtSound != null) audioSource.PlayOneShot(hurtSound);
+        if (hurtSound != null) audioSource.PlayOneShot(hurtSound, hurtVolume);
     }
 
     void Die()
@@ -65,6 +70,7 @@ public class PlayerDeath : MonoBehaviour
             animator.SetTrigger("Die");
         }
 
+        MessageUI.Show("You died...", restartDelay);
         Invoke(nameof(Restart), restartDelay);
     }
 

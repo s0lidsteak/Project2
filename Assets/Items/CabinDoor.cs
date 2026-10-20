@@ -45,7 +45,7 @@ public class CabinDoor : MonoBehaviour
 
         if (inventory == null || !inventory.HasItem(requiredItem))
         {
-            MessageUI.Show("It's locked. I need a key.");
+            MessageUI.Show("It's locked... There's something written on this sign right here.", 4f);
             return;
         }
 
